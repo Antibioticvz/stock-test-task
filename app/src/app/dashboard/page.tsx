@@ -1,4 +1,5 @@
 "use client"
+import StockChart from "@/components/stock-chart"
 import { auth } from "@/lib/firebase-config"
 import { useWatchlist } from "@/lib/services/watchlist"
 import { redirect } from "next/navigation"
@@ -6,7 +7,13 @@ import { useAuthState } from "react-firebase-hooks/auth"
 
 export default function DashboardPage() {
   const [user, loading] = useAuthState(auth)
-  const { watchlist, addToWatchlist, removeFromWatchlist } = useWatchlist()
+  const {
+    watchlist,
+    stocksData,
+    loading: stocksLoading,
+    addToWatchlist,
+    removeFromWatchlist,
+  } = useWatchlist()
 
   if (loading) {
     return <div className="p-4">Loading...</div>
@@ -65,9 +72,19 @@ export default function DashboardPage() {
         {/* Main Chart Section */}
         <section className="lg:col-span-2 bg-white p-4 rounded shadow">
           <h2 className="text-xl font-semibold mb-4">Stock Chart</h2>
-          <div className="h-64 bg-gray-50 flex items-center justify-center">
-            <p className="text-gray-500">Select a stock to view chart</p>
-          </div>
+          {stocksLoading ? (
+            <div className="h-64 flex items-center justify-center">
+              <p>Loading chart data...</p>
+            </div>
+          ) : watchlist.length === 0 ? (
+            <div className="h-64 flex items-center justify-center">
+              <p className="text-gray-500">
+                Add stocks to your watchlist to view charts
+              </p>
+            </div>
+          ) : (
+            <StockChart data={stocksData[watchlist[0]]} />
+          )}
         </section>
 
         {/* Alerts Section */}
